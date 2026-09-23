@@ -1,0 +1,184 @@
+{
+  "name": "Etsy Order Logger",
+  "nodes": [
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyMinute"
+            }
+          ]
+        },
+        "filters": {
+          "q": "subject:sale"
+        }
+      },
+      "type": "n8n-nodes-base.gmailTrigger",
+      "typeVersion": 1.4,
+      "position": [
+        -304,
+        -32
+      ],
+      "id": "bf078b9d-b89c-4a27-b664-9308520bbc52",
+      "name": "Gmail Trigger",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "DTCc5HhKHyvbQBYW",
+          "name": "Gmail account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "const snippet = $input.item.json.snippet;\n\nconst buyer = snippet.match(/Buyer:\\s*(.*?)\\s*Item:/)?.[1] || '';\nconst item = snippet.match(/Item:\\s*(.*?)\\s*Total:/)?.[1] || '';\nconst total = snippet.match(/Total:\\s*\\$?([\\d.]+)/)?.[1] || '';\nconst link = snippet.match(/Order link:\\s*(\\S+)/)?.[1] || '';\n\nreturn {\n  json: {\n    date: new Date().toISOString(),\n    buyer,\n    item,\n    total,\n    link\n  }\n};"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -48,
+        -32
+      ],
+      "id": "1ce3de47-1343-4501-9f39-8865f54f0cf1",
+      "name": "Code in JavaScript"
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1tL3frmknxp1PeFyeVYkjWpAb6x-sG-YdIj9R-eO0rJU",
+          "mode": "list",
+          "cachedResultName": "Etsy Order Logger",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1tL3frmknxp1PeFyeVYkjWpAb6x-sG-YdIj9R-eO0rJU/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1tL3frmknxp1PeFyeVYkjWpAb6x-sG-YdIj9R-eO0rJU/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Date": "={{ $json.date }}",
+            "Buyer": "={{ $json.buyer }}",
+            "Item": "={{ $json.item }}",
+            "Total": "={{ $json.total }}",
+            "Order Link": "={{ $json.link }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Date",
+              "displayName": "Date",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Buyer",
+              "displayName": "Buyer",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Item",
+              "displayName": "Item",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Total",
+              "displayName": "Total",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Order Link",
+              "displayName": "Order Link",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        176,
+        -32
+      ],
+      "id": "8a4702d4-8326-48d9-8066-7984dc49fac8",
+      "name": "Append row in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "8PFii1KwMuDcerZi",
+          "name": "Google Sheets account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Gmail Trigger": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "Append row in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "72d8492f-85ed-4247-bcf2-6d52fac5d748",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "79eacae8c0f77103761c24ef9b9ca2434d164a9a1bd1ebfd8b8fa35ca6cb55fa"
+  },
+  "nodeGroups": [],
+  "id": "u9LqNDvbo5Yk3WVI",
+  "tags": []
+          }
