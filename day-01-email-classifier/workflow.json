@@ -1,0 +1,285 @@
+{
+  "name": "Day 01 - Email Urgency Classifier",
+  "nodes": [
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyMinute"
+            }
+          ]
+        },
+        "filters": {}
+      },
+      "type": "n8n-nodes-base.gmailTrigger",
+      "typeVersion": 1.4,
+      "position": [
+        -288,
+        48
+      ],
+      "id": "021871e6-37f2-45bd-adf7-530e6322eff3",
+      "name": "Gmail Trigger",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "T4yJr4h0v6EgNks2",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "gpt-4o-mini",
+          "mode": "list",
+          "cachedResultName": "GPT-4O-MINI",
+          "cachedResultUrl": ""
+        },
+        "responses": {
+          "values": [
+            {
+              "content": "=Classify this email as one of: Urgent, Normal, Spam-ish. Only respond with one word.\n\nSubject: {{ $json.Subject }}\nBody: {{ $json.snippet }}"
+            }
+          ]
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 2.3,
+      "position": [
+        -128,
+        0
+      ],
+      "id": "b12dd29c-e9d5-4b3a-a11d-790e217cd183",
+      "name": "Message a model",
+      "credentials": {
+        "openAiApi": {
+          "id": null,
+          "name": "",
+          "__aiGatewayManaged": true
+        }
+      }
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "loose",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.output[0].content[0].text }}",
+                    "rightValue": "Urgent",
+                    "operator": {
+                      "type": "string",
+                      "operation": "contains"
+                    },
+                    "id": "1d1f05f7-7d20-4c80-aa4a-bf240136324c"
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "loose",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "9a26bdcb-8d43-44c6-ab49-4d9a55d5ebc7",
+                    "leftValue": "={{ $json.output[0].content[0].text }}",
+                    "rightValue": "Normal",
+                    "operator": {
+                      "type": "string",
+                      "operation": "contains"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "loose",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "4eb88127-1c24-4c7e-87eb-075aba1e7ca9",
+                    "leftValue": "={{ $json.output[0].content[0].text }}",
+                    "rightValue": "Spam-ish",
+                    "operator": {
+                      "type": "string",
+                      "operation": "contains"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            }
+          ]
+        },
+        "looseTypeValidation": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.4,
+      "position": [
+        240,
+        0
+      ],
+      "id": "e86cd3ef-34b7-4046-bf6a-a117a2650dd2",
+      "name": "Switch"
+    },
+    {
+      "parameters": {
+        "operation": "addLabels",
+        "messageId": "={{ $('Gmail Trigger').item.json.id }}",
+        "labelIds": [
+          "Label_850640126777300046"
+        ]
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        464,
+        -112
+      ],
+      "id": "48e282a7-94a7-4aa5-8839-2d1cf290f2c7",
+      "name": "Add label to message",
+      "webhookId": "78ee3562-d785-4c98-bc11-21a4a955b675",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "DTCc5HhKHyvbQBYW",
+          "name": "Gmail account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "addLabels",
+        "messageId": "={{ $('Gmail Trigger').item.json.id }}",
+        "labelIds": [
+          "Label_8231084926154823310"
+        ]
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        464,
+        0
+      ],
+      "id": "d01fb6dc-b94c-4cec-a4c6-2aced7b7b57d",
+      "name": "Add label to message1",
+      "webhookId": "146d4140-ec1f-4185-b023-81e027c5601f",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "DTCc5HhKHyvbQBYW",
+          "name": "Gmail account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "addLabels",
+        "messageId": "={{ $('Gmail Trigger').item.json.id }}",
+        "labelIds": [
+          "Label_2834229268987609315"
+        ]
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        464,
+        112
+      ],
+      "id": "7db799d4-aacd-4faf-bd87-95d49c41c086",
+      "name": "Add label to message2",
+      "webhookId": "b5c5dda8-5698-40e1-a2c9-25c439839dc4",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "DTCc5HhKHyvbQBYW",
+          "name": "Gmail account 2"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Gmail Trigger": {
+      "main": [
+        [
+          {
+            "node": "Message a model",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Message a model": {
+      "main": [
+        [
+          {
+            "node": "Switch",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Switch": {
+      "main": [
+        [
+          {
+            "node": "Add label to message",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Add label to message1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Add label to message2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "2267679f-ffdd-480a-a920-f7edd9b19f08",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "79eacae8c0f77103761c24ef9b9ca2434d164a9a1bd1ebfd8b8fa35ca6cb55fa"
+  },
+  "nodeGroups": [],
+  "id": "Aw01tWesUS7Mx6mM",
+  "tags": []
+          }
